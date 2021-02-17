@@ -44,3 +44,23 @@ The permission rules for images and documents work on a similar basis to pages. 
 Access to specific sets of images and documents can be controlled by setting up *collections*. By default all images and documents belong to the 'root' collection, but new collections can be created through the Settings -> Collections area of the admin interface. Permissions set on 'root' apply to all collections, so a user with 'edit' permission for images on root can edit all images; permissions set on other collections apply to that collection only.
 
 The 'choose' permission for images and documents determines which collections are visible within the chooser interface used to select images and document links for insertion into pages (and other models, such as snippets). Typically, all users are granted choose permission for all collections, allowing them to use any uploaded image or document on pages they create, but this permission can be limited to allow creating collections that are only available for use by specific groups.
+
+Displaying custom permissions in the admin
+------------------------------------------
+
+Most permissions will automatically show up in the wagtail admin Group edit form - but you can also add them in directly if you need to, in an app's ``wagtail_hooks.py`` file:
+
+.. code-block:: python
+
+    from django.contrib.auth.models import Permission
+    from wagtail.core import hooks
+
+
+    @hooks.register('register_permissions')
+    def register_permissions():
+        app = 'blog'
+        model = 'extramodelset'
+
+        return Permission.objects.filter(content_type__app_label=app, codename__in=[
+            f"view_{model}", f"add_{model}", f"change_{model}", f"delete_{model}"
+        ])
